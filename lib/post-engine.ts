@@ -90,34 +90,52 @@ function buildXPost(source: string) {
 
 function adaptLinkedIn(xPost: string, source: string) {
   const sentences = sentenceList(source).slice(0, 5);
+  const lead = firstLine(xPost);
   const proof = sentences[1] || "The gap is not strategy. It is execution.";
   const consequence = sentences[2] || "Operators win when the next move is obvious.";
+  const operatorMove = sentences[3] || "The next useful move is to make the point visible and ship it.";
 
   return [
-    xPost,
+    lead,
     "",
+    "What changes:",
     proof,
     "",
     consequence,
     "",
-    "Move faster. Publish the decision.",
+    "Operator move:",
+    operatorMove,
+    "",
+    "Publish the decision.",
   ].join("\n");
 }
 
 function adaptInstagram(xPost: string, source: string) {
+  const hook = firstLine(xPost);
   const bullets = sentenceList(source)
     .slice(1, 4)
-    .map((sentence) => `- ${fitToLimit(sentence, 96)}`);
+    .map((sentence) => sentence.replace(/[.!?]+$/, ""))
+    .map((sentence) => fitToLimit(sentence, 78))
+    .map((sentence) => `/${sentence}`);
 
-  return [xPost, "", ...bullets, "", "Ship the post."].filter(Boolean).join("\n");
+  return [hook, "", ...bullets, "", "Post it before it gets overworked."].filter(Boolean).join("\n");
 }
 
 function adaptEmail(xPost: string, source: string) {
   const sentences = sentenceList(source);
-  const subject = fitToLimit(xPost.split("\n")[0], 68);
-  const body = sentences.slice(1, 4).join(" ");
+  const subject = fitToLimit(firstLine(xPost), 68);
+  const opener = sentences[1] || "The useful move is already in front of you.";
+  const body = sentences[2] || "Make the point clear, remove the extra framing, and publish the signal.";
 
-  return [`Subject: ${subject}`, "", xPost, "", body || "The next move is the message."].join("\n");
+  return [
+    `Subject: ${subject}`,
+    "",
+    opener,
+    "",
+    body,
+    "",
+    "Send the version that makes the next step obvious.",
+  ].join("\n");
 }
 
 function tightenOpening(source: string) {
@@ -191,6 +209,10 @@ function sentenceList(value: string) {
 
 function firstSentence(value: string) {
   return sentenceList(value)[0] || normalizeWhitespace(value);
+}
+
+function firstLine(value: string) {
+  return value.split("\n").map((line) => line.trim()).find(Boolean) || normalizeWhitespace(value);
 }
 
 function stripDisclaimers(value: string) {
